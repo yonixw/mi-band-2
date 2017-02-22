@@ -5,6 +5,8 @@ import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -14,6 +16,7 @@ import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "YONI-MI-2";
@@ -25,6 +28,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (myGatBand != null)
+            DisconnectGatt();
+        super.onDestroy();
     }
 
     Context myContext;
@@ -90,14 +100,30 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    BluetoothGatt myGatBand;
     public void ConnectToGatt(BluetoothDevice myBand) {
         // GATT is Just another specification:
         // https://www.bluetooth.com/specifications/gatt/services
         Log.d(TAG, "(*) Establishing connection to gatt");
-        myBand.connectGatt(myContext, true ,myGattCallback );
+        myGatBand = myBand.connectGatt(myContext, true ,myGattCallback );
     }
 
+    public  void  DisconnectGatt()  {
+        if(myGatBand != null)
+        {
+            new Handler(Looper.getMainLooper()).post(new Runnable()
+            {
+                @Override public void run()
+                {
+                    myGatBand.disconnect();
+                    myGatBand.close();
+                    myGatBand = null;
+                }
+            });
+        }
+    }
 
+    
 
 }
 
@@ -105,5 +131,6 @@ public class MainActivity extends AppCompatActivity {
 Credit and thanks:
 
 https://github.com/lwis/miband-notifier/
+http://allmydroids.blogspot.co.il/2014/12/xiaomi-mi-band-ble-protocol-reverse.html
 
 */
