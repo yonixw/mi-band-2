@@ -3,6 +3,7 @@ package us.cpluspl.yonixw.readheartbatmiband2;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Handler;
@@ -123,8 +124,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    
+    public void writeDataExampleToTest() {
+        Log.d(TAG, "* Getting gatt servie for mi band 2");
+        BluetoothGattService myGatService =
+                myGatBand.getService(UUID.fromString( String.format(Consts.BASE_UUID, "FEE1")));
+        if (myGatService != null) {
+            Log.d(TAG, "* Getting gatt Characteristic for test");
+            BluetoothGattCharacteristic myGatChar
+                    = myGatService.getCharacteristic(Consts.UUID_CHARACTERISTIC_TEST);
+            if (myGatChar != null) {
+                Log.d(TAG, "* Writing to test char");
 
+                byte[] value = new byte[1];
+                value[0] = (byte) (2 & 0xFF);
+                myGatChar.setValue(value);
+                boolean status = myGatBand.writeCharacteristic(myGatChar);
+
+                Log.d(TAG, "* Writing status:" + status);
+            }
+        }
+    }
+
+    public void btnTest(View view) {
+        writeDataExampleToTest();
+    }
 }
 
 /*
@@ -132,5 +155,7 @@ Credit and thanks:
 
 https://github.com/lwis/miband-notifier/
 http://allmydroids.blogspot.co.il/2014/12/xiaomi-mi-band-ble-protocol-reverse.html
+https://github.com/Freeyourgadget/Gadgetbridge
+http://stackoverflow.com/questions/20043388/working-with-ble-android-4-3-how-to-write-characteristics
 
 */

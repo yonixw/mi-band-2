@@ -16,4 +16,10 @@
         android:layout_height="wrap_content"
         android:text="Run"
         android:onClick="btnRun"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Write Test"
+        android:onClick="btnTest"/>
 </RelativeLayout>
