@@ -99,6 +99,12 @@ public class MainActivity extends AppCompatActivity {
         {
             Log.d(TAG, "Write successful: " + Arrays.toString(characteristic.getValue()));
         }
+
+        @Override
+        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            Log.d(TAG, "Read successful: " + Arrays.toString(characteristic.getValue()));
+            super.onCharacteristicRead(gatt, characteristic, status);
+        }
     };
 
     BluetoothGatt myGatBand;
@@ -127,20 +133,27 @@ public class MainActivity extends AppCompatActivity {
     public void writeDataExampleToTest() {
         Log.d(TAG, "* Getting gatt servie for mi band 2");
         BluetoothGattService myGatService =
-                myGatBand.getService(UUID.fromString( String.format(Consts.BASE_UUID, "FEE1")));
+                myGatBand.getService(Consts.UUID_SERVICE_GENERIC);
         if (myGatService != null) {
             Log.d(TAG, "* Getting gatt Characteristic for test");
-            BluetoothGattCharacteristic myGatChar
-                    = myGatService.getCharacteristic(Consts.UUID_CHARACTERISTIC_TEST);
-            if (myGatChar != null) {
-                Log.d(TAG, "* Writing to test char");
 
-                byte[] value = new byte[1];
+            for (BluetoothGattCharacteristic c: myGatService.getCharacteristics()) {
+                Log.d(TAG,"Found: " + c.getUuid().toString());
+            }
+
+            BluetoothGattCharacteristic myGatChar
+                    = myGatService.getCharacteristic(Consts.UUID_CHARACTERISTIC_DEVICE_NAME);
+            if (myGatChar != null) {
+                Log.d(TAG, "* Reading data");
+
+                /*
+                byte[] value = new byte[10];
                 value[0] = (byte) (2 & 0xFF);
                 myGatChar.setValue(value);
-                boolean status = myGatBand.writeCharacteristic(myGatChar);
+                boolean status = myGatBand.writeCharacteristic(myGatChar);*/
 
-                Log.d(TAG, "* Writing status:" + status);
+                boolean status =  myGatBand.readCharacteristic(myGatChar);
+                Log.d(TAG, "* Read status :" + status);
             }
         }
     }
@@ -157,5 +170,9 @@ https://github.com/lwis/miband-notifier/
 http://allmydroids.blogspot.co.il/2014/12/xiaomi-mi-band-ble-protocol-reverse.html
 https://github.com/Freeyourgadget/Gadgetbridge
 http://stackoverflow.com/questions/20043388/working-with-ble-android-4-3-how-to-write-characteristics
+
+// Available services\Characteristics:
+http://jellygom.com/2016/09/30/Mi-Band-UUID.html
+https://github.com/Freeyourgadget/Gadgetbridge/blob/master/app/src/main/java/nodomain/freeyourgadget/gadgetbridge/devices/miband/MiBand2Service.java
 
 */
