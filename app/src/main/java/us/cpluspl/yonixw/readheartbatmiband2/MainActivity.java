@@ -232,6 +232,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
 
+            // Need to wait before first trigger, maybe something about the descriptor....
             Thread.sleep(5000,0);
 
             getNewHeartBeat();
