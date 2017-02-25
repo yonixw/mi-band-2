@@ -130,12 +130,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void writeDataExampleToTest() {
+    public void readDataExampleToTest() {
         Log.d(TAG, "* Getting gatt servie for mi band 2");
         BluetoothGattService myGatService =
                 myGatBand.getService(Consts.UUID_SERVICE_GENERIC);
         if (myGatService != null) {
-            Log.d(TAG, "* Getting gatt Characteristic for test");
+            Log.d(TAG, "* Getting gatt Characteristic for device name");
 
             for (BluetoothGattCharacteristic c: myGatService.getCharacteristics()) {
                 Log.d(TAG,"Found: " + c.getUuid().toString());
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void btnTest(View view) {
-        writeDataExampleToTest();
+        readDataExampleToTest();
     }
 }
 
