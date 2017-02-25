@@ -105,6 +105,12 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Read successful: " + Arrays.toString(characteristic.getValue()));
             super.onCharacteristicRead(gatt, characteristic, status);
         }
+
+        @Override
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+            super.onCharacteristicChanged(gatt, characteristic);
+            Log.d(TAG, "Got notification: " +  Arrays.toString(characteristic.getValue()));
+        }
     };
 
     BluetoothGatt myGatBand;
@@ -131,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void readDataExampleToTest() {
-        Log.d(TAG, "* Getting gatt servie for mi band 2");
+        Log.d(TAG, "* Getting gatt servie for general device");
         BluetoothGattService myGatService =
                 myGatBand.getService(Consts.UUID_SERVICE_GENERIC);
         if (myGatService != null) {
@@ -158,8 +164,32 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void getTouchNotifications() {
+        Log.d(TAG, "* Getting gatt servie for mi band 2");
+        BluetoothGattService myGatService =
+                myGatBand.getService(Consts.UUID_SERVICE_MIBAND_SERVICE);
+        if (myGatService != null) {
+            Log.d(TAG, "* Getting gatt Characteristic for button touch");
+
+            for (BluetoothGattCharacteristic c: myGatService.getCharacteristics()) {
+                Log.d(TAG,"Found: " + c.getUuid().toString());
+            }
+
+            BluetoothGattCharacteristic myGatChar
+                    = myGatService.getCharacteristic(Consts.UUID_BUTTON_TOUCH);
+            if (myGatChar != null) {
+                Log.d(TAG, "* Statring listening");
+
+                // second parametes is for starting\stopping the listener.
+                boolean status =  myGatBand.setCharacteristicNotification(myGatChar, true);
+                Log.d(TAG, "* Set notification status :" + status);
+            }
+        }
+    }
+
     public void btnTest(View view) {
-        readDataExampleToTest();
+        //readDataExampleToTest();
+        getTouchNotifications();
     }
 }
 
