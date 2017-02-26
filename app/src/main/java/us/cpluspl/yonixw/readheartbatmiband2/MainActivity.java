@@ -16,12 +16,14 @@ import android.view.View;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "YONI-MI-2";
 
+    Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +113,24 @@ public class MainActivity extends AppCompatActivity {
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             Log.d(TAG, " - Notifiaction UUID: " +  characteristic.getUuid().toString());
             Log.d(TAG, " - Notifiaction value: " +  Arrays.toString(characteristic.getValue()));
+
+            final byte hearbeat =
+                    characteristic.getValue()[1];
+
+            if (characteristic.getUuid().equals(Consts.UUID_NOTIFICATION_HEARTRATE)) {
+                handler.post(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this,
+                                "Heartbeat: " + Byte.toString(hearbeat)
+                                , Toast.LENGTH_LONG).show();
+                    }
+                });
+
+
+            }
+
             super.onCharacteristicChanged(gatt, characteristic);
         }
 
@@ -191,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    boolean setup = false;
     public void getHeartBeat() throws InterruptedException {
         /*
         Steps to read heartbeat:
@@ -228,6 +249,8 @@ public class MainActivity extends AppCompatActivity {
                     myDescriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                     status = myGatBand.writeDescriptor(myDescriptor);
                     Log.d(TAG, "Writing decriptors result: " + status);
+
+                    setup =true;
                 }
 
             }
@@ -243,6 +266,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getNewHeartBeat() throws InterruptedException {
+        if (!setup) {
+            Toast.makeText(MainActivity.this, "Please setup first!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Log.d(TAG, "* Getting gatt servie for heartbeat");
         BluetoothGattService myGatService =
                 myGatBand.getService(Consts.UUID_SERVICE_HEARTBEAT);
@@ -296,4 +324,6 @@ http://stackoverflow.com/questions/36311874/heart-rate-measuring-using-xiaomi-mi
 https://github.com/AlexanderHryk/MiFood/
 again: http://stackoverflow.com/questions/20043388/working-with-ble-android-4-3-how-to-write-characteristics
 https://github.com/dkhmelenko/miband-android/blob/master/miband-sdk/src/main/java/com/khmelenko/lab/miband/model/Protocol.java
+
+http://stackoverflow.com/questions/7378936/how-to-show-toast-message-from-background-thread
 */
