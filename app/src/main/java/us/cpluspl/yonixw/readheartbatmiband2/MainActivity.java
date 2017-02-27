@@ -21,21 +21,22 @@ import android.widget.Toast;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
-    public static final String TAG = "YONI-MI-2";
+
 
     Handler handler = new Handler(Looper.getMainLooper());
+    BLEMiBand2Helper helper = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        helper = new BLEMiBand2Helper(MainActivity.this, handler);
     }
 
     @Override
     protected void onDestroy() {
-        if (myGatBand != null)
+
             DisconnectGatt();
         super.onDestroy();
     }
@@ -52,164 +53,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    BluetoothDevice findMiBandBluetooth(BluetoothAdapter myBluetoothAdapter) {
-        Log.d(TAG, "(*) Initialising Bluetooth connection");
-
-        if(myBluetoothAdapter.isEnabled()) {
-            for (BluetoothDevice pairedDevice : myBluetoothAdapter.getBondedDevices()) {
-                if (pairedDevice.getName().contains("MI")) {
-                    Log.d(TAG, "\tName: " +  pairedDevice.getName());
-                    Log.d(TAG, "\tMAC: " + pairedDevice.getAddress());
-
-                    return pairedDevice;
-                }
-            }
-        }
-
-        return  null; // Not found
-    }
-
-    private BluetoothGattCallback myGattCallback = new BluetoothGattCallback()
-    {
-        @Override
-        public void onServicesDiscovered(BluetoothGatt gatt, int status)
-        {
-            if(status == BluetoothGatt.GATT_SUCCESS)
-            {
-
-            }
-        }
-
-        @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState)
-        {
-            switch(newState)
-            {
-                case BluetoothProfile.STATE_CONNECTED:
-                    Log.d(TAG, "Gatt state: connected");
-                    gatt.discoverServices();
-
-                    break;
-                default:
-                    Log.d(TAG, "Gatt state: not connected");
-                    break;
-            }
-        }
-
-        @Override
-        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status)
-        {
-            Log.d(TAG, "Write successful: " + Arrays.toString(characteristic.getValue()));
-            super.onCharacteristicWrite(gatt,characteristic,status);
-        }
-
-        @Override
-        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            Log.d(TAG, "Read successful: " + Arrays.toString(characteristic.getValue()));
-            super.onCharacteristicRead(gatt, characteristic, status);
-        }
-
-        @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            Log.d(TAG, " - Notifiaction UUID: " +  characteristic.getUuid().toString());
-            Log.d(TAG, " - Notifiaction value: " +  Arrays.toString(characteristic.getValue()));
-
-            final byte hearbeat =
-                    characteristic.getValue()[1];
-
-            if (characteristic.getUuid().equals(Consts.UUID_NOTIFICATION_HEARTRATE)) {
-                handler.post(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this,
-                                "Heartbeat: " + Byte.toString(hearbeat)
-                                , Toast.LENGTH_LONG).show();
-                    }
-                });
 
 
-            }
-
-            super.onCharacteristicChanged(gatt, characteristic);
-        }
 
 
-    };
 
-    BluetoothGatt myGatBand;
-    public void ConnectToGatt(BluetoothDevice myBand) {
-        // GATT is Just another specification:
-        // https://www.bluetooth.com/specifications/gatt/services
-        Log.d(TAG, "(*) Establishing connection to gatt");
-        myGatBand = myBand.connectGatt(myContext, true ,myGattCallback );
-    }
 
-    public  void  DisconnectGatt()  {
-        if(myGatBand != null)
-        {
-            new Handler(Looper.getMainLooper()).post(new Runnable()
-            {
-                @Override public void run()
-                {
-                    myGatBand.disconnect();
-                    myGatBand.close();
-                    myGatBand = null;
-                }
-            });
-        }
-    }
 
-    public void readDataExampleToTest() {
-        Log.d(TAG, "* Getting gatt servie for general device");
-        BluetoothGattService myGatService =
-                myGatBand.getService(Consts.UUID_SERVICE_GENERIC);
-        if (myGatService != null) {
-            Log.d(TAG, "* Getting gatt Characteristic for device name");
 
-            for (BluetoothGattCharacteristic c: myGatService.getCharacteristics()) {
-                Log.d(TAG,"Found: " + c.getUuid().toString());
-            }
 
-            BluetoothGattCharacteristic myGatChar
-                    = myGatService.getCharacteristic(Consts.UUID_CHARACTERISTIC_DEVICE_NAME);
-            if (myGatChar != null) {
-                Log.d(TAG, "* Reading data");
 
-                /*
-                byte[] value = new byte[10];
-                value[0] = (byte) (2 & 0xFF);
-                myGatChar.setValue(value);
-                boolean status = myGatBand.writeCharacteristic(myGatChar);*/
-
-                boolean status =  myGatBand.readCharacteristic(myGatChar);
-                Log.d(TAG, "* Read status :" + status);
-            }
-        }
-    }
-
-    public void getTouchNotifications() {
-        Log.d(TAG, "* Getting gatt servie for mi band 2");
-        BluetoothGattService myGatService =
-                myGatBand.getService(Consts.UUID_SERVICE_MIBAND_SERVICE);
-        if (myGatService != null) {
-            Log.d(TAG, "* Getting gatt Characteristic for button touch");
-
-            for (BluetoothGattCharacteristic c: myGatService.getCharacteristics()) {
-                Log.d(TAG,"Found: " + c.getUuid().toString());
-            }
-
-            BluetoothGattCharacteristic myGatChar
-                    = myGatService.getCharacteristic(Consts.UUID_BUTTON_TOUCH);
-            if (myGatChar != null) {
-                Log.d(TAG, "* Statring listening");
-
-                // second parametes is for starting\stopping the listener.
-                boolean status =  myGatBand.setCharacteristicNotification(myGatChar, true);
-                Log.d(TAG, "* Set notification status :" + status);
-            }
-        }
-    }
 
     boolean setup = false;
     public void getHeartBeat() throws InterruptedException {
