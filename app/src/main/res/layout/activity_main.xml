@@ -14,7 +14,7 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Run"
+        android:text="Connect to Blutooth"
         android:id="@+id/btnRun"
         android:onClick="btnRun"/>
 
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/btnRun"
         android:id="@+id/btnTest"
-        android:text="Write Test"
+        android:text="Listen to button press"
         android:onClick="btnTest"/>
 
     <Button
@@ -31,7 +31,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/btnTest"
         android:id="@+id/btnSetupHearRate"
-        android:text="Setup Heart Rate"
+        android:text="Setup Heart Rate Listening"
         android:onClick="btnSetuphearRate"/>
 
     <Button
@@ -39,6 +39,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/btnSetupHearRate"
         android:id="@+id/btnStartHearRate"
-        android:text="Start Heart Rate"
+        android:text="Start new Heart Rate"
         android:onClick="btnTestHeartRate"/>
 </RelativeLayout>

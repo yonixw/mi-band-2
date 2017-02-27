@@ -14,7 +14,7 @@ import android.widget.Toast;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.BLEAction {
-
+    public static final String LOG_TAG = "Yoni";
 
     Handler handler = new Handler(Looper.getMainLooper());
     BLEMiBand2Helper helper = null;

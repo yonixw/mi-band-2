@@ -1,4 +1,4 @@
-package us.cpluspl.yonixw.talkingalarm;
+package us.cpluspl.yonixw.readheartbatmiband2;
 
 import android.content.Context;
 import android.os.Environment;
