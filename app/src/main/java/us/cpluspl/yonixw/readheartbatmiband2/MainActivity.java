@@ -163,4 +163,5 @@ again: http://stackoverflow.com/questions/20043388/working-with-ble-android-4-3-
 https://github.com/dkhmelenko/miband-android/blob/master/miband-sdk/src/main/java/com/khmelenko/lab/miband/model/Protocol.java
 
 http://stackoverflow.com/questions/7378936/how-to-show-toast-message-from-background-thread
+http://stackoverflow.com/questions/6270132/create-a-custom-event-in-java
 */
