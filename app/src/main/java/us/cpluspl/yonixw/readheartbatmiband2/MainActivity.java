@@ -1,5 +1,7 @@
 package us.cpluspl.yonixw.readheartbatmiband2;
 
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
@@ -9,7 +11,9 @@ import android.view.View;
 import android.bluetooth.BluetoothAdapter;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.UUID;
+
+public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.BLEAction {
 
 
     Handler handler = new Handler(Looper.getMainLooper());
@@ -21,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         helper = new BLEMiBand2Helper(MainActivity.this, handler);
+        helper.addListener(this);
     }
 
     @Override
@@ -90,6 +95,52 @@ public class MainActivity extends AppCompatActivity {
         getNewHeartBeat();
     }
 
+    /* ===========  EVENTS (background thread) =============== */
+
+    @Override
+    public void onDisconnect() {
+
+    }
+
+    @Override
+    public void onRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+
+    }
+
+    @Override
+    public void onWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+
+    }
+
+    @Override
+    public void onNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+        UUID alertUUID = characteristic.getUuid();
+        if (alertUUID.equals(Consts.UUID_NOTIFICATION_HEARTRATE)) {
+            final byte hearbeat =
+                    characteristic.getValue()[1];
+
+            handler.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    Toast.makeText(MainActivity.this,
+                            "Heartbeat: " + Byte.toString(hearbeat)
+                            , Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+        else if (alertUUID.equals(Consts.UUID_BUTTON_TOUCH)) {
+            handler.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    Toast.makeText(MainActivity.this,
+                            "Button Press!"
+                            , Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
 }
 
 /*

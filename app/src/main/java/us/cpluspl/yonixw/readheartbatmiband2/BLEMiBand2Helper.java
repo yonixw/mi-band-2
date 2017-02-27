@@ -142,25 +142,6 @@ public class BLEMiBand2Helper {
             Log.d(TAG, " - Notifiaction UUID: " +  characteristic.getUuid().toString());
             Log.d(TAG, " - Notifiaction value: " +  Arrays.toString(characteristic.getValue()));
             raiseonNotification(gatt, characteristic);
-
-            /*
-            if (characteristic.getUuid().equals(Consts.UUID_NOTIFICATION_HEARTRATE)) {
-                final byte hearbeat =
-                        characteristic.getValue()[1];
-
-                myHandler.post(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        Toast.makeText(myContext,
-                                "Heartbeat: " + Byte.toString(hearbeat)
-                                , Toast.LENGTH_LONG).show();
-                    }
-                });
-
-
-            }
-            */
             super.onCharacteristicChanged(gatt, characteristic);
         }
 
