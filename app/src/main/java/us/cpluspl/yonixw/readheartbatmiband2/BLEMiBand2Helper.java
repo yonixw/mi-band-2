@@ -13,6 +13,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.logging.Handler;
@@ -97,6 +98,7 @@ public class BLEMiBand2Helper {
             {
 
             }
+            Log.d(TAG, "Service discovered with status " + status);
         }
 
         @Override
@@ -111,6 +113,7 @@ public class BLEMiBand2Helper {
                     break;
                 default:
                     Log.d(TAG, "Gatt state: not connected");
+                    raiseonDisconnect();
                     isConnectedToGatt = false;
                     break;
             }
@@ -120,12 +123,14 @@ public class BLEMiBand2Helper {
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status)
         {
             Log.d(TAG, "Write successful: " + Arrays.toString(characteristic.getValue()));
+            raiseonWrite(gatt,characteristic,status);
             super.onCharacteristicWrite(gatt,characteristic,status);
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             Log.d(TAG, "Read successful: " + Arrays.toString(characteristic.getValue()));
+            raiseonRead(gatt,characteristic,status);
             super.onCharacteristicRead(gatt, characteristic, status);
         }
 
@@ -133,9 +138,9 @@ public class BLEMiBand2Helper {
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             Log.d(TAG, " - Notifiaction UUID: " +  characteristic.getUuid().toString());
             Log.d(TAG, " - Notifiaction value: " +  Arrays.toString(characteristic.getValue()));
+            raiseonNotification(gatt, characteristic);
 
-
-
+            /*
             if (characteristic.getUuid().equals(Consts.UUID_NOTIFICATION_HEARTRATE)) {
                 final byte hearbeat =
                         characteristic.getValue()[1];
@@ -152,15 +157,58 @@ public class BLEMiBand2Helper {
 
 
             }
-
+            */
             super.onCharacteristicChanged(gatt, characteristic);
         }
 
 
     };
 
+    public interface BLEAction {
+        void onDisconnect();
+        void onRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status);
+        void onWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status);
+        void onNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic);
+    }
+
+    /* =========  Handling Events  ============== */
+
+    private ArrayList<BLEAction> listeners = new ArrayList<BLEAction>();
+
+    public void addListener(BLEAction toAdd) {
+        listeners.add(toAdd);
+    }
+
+    public void removeListener(BLEAction toDel) {
+        listeners.remove(toDel);
+    }
+
+    public void raiseonNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+        // Notify everybody that may be interested.
+        for (BLEAction listener : listeners)
+            listener.onNotification( gatt,characteristic);
+    }
+
+    public void raiseonRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic,int status) {
+        // Notify everybody that may be interested.
+        for (BLEAction listener : listeners)
+            listener.onRead( gatt,characteristic,status);
+    }
+
+    public void raiseonWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic,int status) {
+        // Notify everybody that may be interested.
+        for (BLEAction listener : listeners)
+            listener.onRead( gatt,characteristic,status);
+    }
+
+    public void raiseonDisconnect() {
+        // Notify everybody that may be interested.
+        for (BLEAction listener : listeners)
+            listener.onDisconnect();
+    }
+
     /* =========  Handling Data  ============== */
-    
+
     public void readData(UUID service, UUID Characteristics) {
         if (!isConnectedToGatt || myGatBand == null) {
             Log.d(TAG, "Cant read from BLE, not initialized.");
