@@ -39,6 +39,9 @@ public class BLEMiBand2Helper {
         myHandler = handler;
     }
 
+    public  boolean isConnected() {
+        return  isConnectedToGatt;
+    }
 
     /* =========  Handling Initializing  ============== */
 

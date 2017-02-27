@@ -1,12 +1,5 @@
 package us.cpluspl.yonixw.readheartbatmiband2;
 
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothProfile;
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
@@ -14,11 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.util.Log;
 import android.widget.Toast;
-
-import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,36 +25,21 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-
-            DisconnectGatt();
+        if (helper != null)
+            helper.DisconnectGatt();
         super.onDestroy();
     }
 
-    Context myContext;
-    public void btnRun(View view) {
-        // Like network card, connect to all devices in Bluetooth (like PC in Netowrk)
-        final BluetoothAdapter myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice myBand =  findMiBandBluetooth(myBluetoothAdapter);
+    // Like network card, connect to all devices in Bluetooth (like PC in Netowrk)
+    final BluetoothAdapter myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        myContext = view.getContext();
-        if (myBand != null) {
-            ConnectToGatt(myBand);
-        }
+    public void btnRun(View view) {
+        helper.findBluetoothDevice(myBluetoothAdapter, "MI");
+        helper.ConnectToGatt();
     }
 
 
-
-
-
-
-
-
-
-
-
-
-    boolean setup = false;
-    public void getHeartBeat() throws InterruptedException {
+    public void setupHeartBeat() throws InterruptedException {
         /*
         Steps to read heartbeat:
             - Register Notification (like in touch press)
@@ -74,83 +48,42 @@ public class MainActivity extends AppCompatActivity {
             - Listener will get result
         */
 
-        Log.d(TAG, "* Getting gatt servie for heartbeat");
-        BluetoothGattService myGatService =
-                myGatBand.getService(Consts.UUID_SERVICE_HEARTBEAT);
-        if (myGatService != null) {
-            Log.d(TAG, "* Getting gatt Characteristic for hearbeat callback");
+        if (helper != null)
+            helper.getNotificationsWithDescriptor(
+                Consts.UUID_SERVICE_HEARTBEAT,
+                Consts.UUID_NOTIFICATION_HEARTRATE,
+                Consts.UUID_DESCRIPTOR_UPDATE_NOTIFICATION
+            );
 
-            for (BluetoothGattCharacteristic c: myGatService.getCharacteristics()) {
-                Log.d(TAG,"Found: " + c.getUuid().toString());
-            }
-
-            BluetoothGattCharacteristic myGatChar
-                    = myGatService.getCharacteristic(Consts.UUID_NOTIFICATION_HEARTRATE);
-            if (myGatChar != null) {
-
-                Log.d(TAG, "* Statring listening");
-
-                // second parametes is for starting\stopping the listener.
-                boolean status =  myGatBand.setCharacteristicNotification(myGatChar, true);
-                Log.d(TAG, "* Set notification status :" + status);
-
-                // Set Descriptor:
-                BluetoothGattDescriptor myDescriptor
-                    = myGatChar.getDescriptor(Consts.UUID_DESCRIPTOR_UPDATE_NOTIFICATION);
-                if (myDescriptor != null) {
-                    Log.d(TAG, "Writing decriptors");
-                    myDescriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                    status = myGatBand.writeDescriptor(myDescriptor);
-                    Log.d(TAG, "Writing decriptors result: " + status);
-
-                    setup =true;
-                }
-
-            }
-
-            // Need to wait before first trigger, maybe something about the descriptor....
-            Thread.sleep(5000,0);
-
-            getNewHeartBeat();
-        }
-
-
-
+        // Need to wait before first trigger, maybe something about the descriptor....
+        Thread.sleep(5000,0);
     }
 
     public void getNewHeartBeat() throws InterruptedException {
-        if (!setup) {
+        if (helper == null || !helper.isConnected()) {
             Toast.makeText(MainActivity.this, "Please setup first!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Log.d(TAG, "* Getting gatt servie for heartbeat");
-        BluetoothGattService myGatService =
-                myGatBand.getService(Consts.UUID_SERVICE_HEARTBEAT);
-        if (myGatService != null) {
-            // Now write to trigger heartbeat:
-            Log.d(TAG, "* Getting gatt Characteristic for hearbeat trigger");
-            BluetoothGattCharacteristic myGatChar
-                    = myGatService.getCharacteristic(Consts.UUID_START_HEARTRATE_CONTROL_POINT);
-            if (myGatChar != null) {
-                Log.d(TAG, "* Writing trigger");
-                myGatChar.setValue(Consts.BYTE_NEW_HEART_RATE_SCAN);
+            helper.writeData(
+                    Consts.UUID_SERVICE_HEARTBEAT,
+                    Consts.UUID_START_HEARTRATE_CONTROL_POINT,
+                    Consts.BYTE_NEW_HEART_RATE_SCAN
+                    );
+    }
 
-                boolean status =  myGatBand.writeCharacteristic(myGatChar);
-                Log.d(TAG, "* Writting trigger status :" + status);
-            }
-        }
+    public void getTouchNotifications() {
+        helper.getNotifications(
+                Consts.UUID_SERVICE_MIBAND_SERVICE,
+                Consts.UUID_BUTTON_TOUCH);
     }
 
     public void btnTest(View view) throws InterruptedException {
-        //readDataExampleToTest();
         getTouchNotifications();
-
-
     }
 
     public void btnSetuphearRate(View view) throws InterruptedException {
-        getHeartBeat();
+        setupHeartBeat();
     }
 
     public void btnTestHeartRate(View view) throws InterruptedException {
