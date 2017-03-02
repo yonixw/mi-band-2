@@ -28,13 +28,26 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
 
         helper = new BLEMiBand2Helper(MainActivity.this, handler);
         helper.addListener(this);
+
+        initSoundHelper();
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onResume() {
+        helper.findBluetoothDevice(myBluetoothAdapter, "MI");
+        helper.ConnectToGatt();
+
+        getTouchNotifications();
+        setupHeartBeat();
+
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
         if (helper != null)
             helper.DisconnectGatt();
-        super.onDestroy();
+        super.onPause();
     }
 
     // Like network card, connect to all devices in Bluetooth (like PC in Netowrk)
@@ -46,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
     }
 
 
-    public void setupHeartBeat() throws InterruptedException {
+    public void setupHeartBeat() {
         /*
         Steps to read heartbeat:
             - Register Notification (like in touch press)
@@ -63,7 +76,12 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
             );
 
         // Need to wait before first trigger, maybe something about the descriptor....
-        Thread.sleep(5000,0);
+        try {
+            Toast.makeText(MainActivity.this, "Wait for heartbeat setup...", Toast.LENGTH_LONG).show();
+            Thread.sleep(5000,0);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void getNewHeartBeat() throws InterruptedException {
