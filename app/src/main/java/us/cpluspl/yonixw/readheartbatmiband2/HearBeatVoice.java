@@ -9,6 +9,9 @@ public class HearBeatVoice {
     static String nullSound = "empty";
     static String tensPostfix = "esre";
 
+    static String intro = "intro"; // My hear beat is:
+    static String units = "units"; // beat per minute.
+
     // ones - "o1" to "o9"
     // tens - "t1" to "t9"
     // hundreds - "h1" to "h9" // (but hear beat is never more than 200 ...)
@@ -52,6 +55,9 @@ public class HearBeatVoice {
 
         if (Hearbeat < 0 ) return;
 
+
+        sh.addWAVSound(intro);
+
         if (Hearbeat == 0 ) {
             sh.addWAVSound(cantRead); // Mi band couldnt read heartbeat.
         }
@@ -67,5 +73,7 @@ public class HearBeatVoice {
 
             addLessThan100(sh,Hearbeat);
         }
+
+        sh.addWAVSound(units);
     }
 }

@@ -2,10 +2,12 @@ package us.cpluspl.yonixw.readheartbatmiband2;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import android.bluetooth.BluetoothAdapter;
@@ -125,7 +127,11 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
                 public void run() {
                     Toast.makeText(MainActivity.this,
                             "Heartbeat: " + Byte.toString(hearbeat)
-                            , Toast.LENGTH_LONG).show();
+                            , Toast.LENGTH_SHORT).show();
+
+                    // Set max volume and read heart beat.
+                    setMaxVolume();
+                    HearBeatVoice.readHeartbeat(mySounds, hearbeat);
                 }
             });
         }
@@ -136,10 +142,45 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
                 public void run() {
                     Toast.makeText(MainActivity.this,
                             "Button Press!"
-                            , Toast.LENGTH_LONG).show();
+                            , Toast.LENGTH_SHORT).show();
                 }
             });
         }
+    }
+
+    /* ===========  Touch pattern =============== */
+
+
+     /* ===========  Sounds =============== */
+
+    int currentVolume = 0;
+    AudioManager audiManager;
+
+    public void setMaxVolume() {
+        currentVolume = audiManager.getStreamVolume(audiManager.STREAM_MUSIC);
+        int amStreamMusicMaxVol =
+                (int) (audiManager.getStreamMaxVolume(audiManager.STREAM_MUSIC) * 0.60f);
+
+        audiManager.setStreamVolume(audiManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
+    }
+
+    public void resumeVolume() {
+        audiManager.setStreamVolume(audiManager.STREAM_MUSIC, currentVolume, 0);
+    }
+
+    SoundHelper mySounds;
+    private void initSoundHelper() {
+        audiManager = (AudioManager)getSystemService(getApplicationContext().AUDIO_SERVICE);
+        mySounds = new SoundHelper(getApplicationContext());
+
+        mySounds.setPlaybackFinishListener(new SoundHelper.PlaybackFinishListener() {
+            @Override
+            public void onPlaybackFinish() {
+                Log.d(LOG_TAG,"Got SoundHelper finish event!");
+                mySounds.releaseAllSounds();
+                resumeVolume();
+            }
+        });
     }
 }
 
