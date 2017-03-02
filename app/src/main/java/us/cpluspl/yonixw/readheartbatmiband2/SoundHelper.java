@@ -39,6 +39,9 @@ public class SoundHelper {
     }
 
     private void addSound(String shortName) {
+        // To see the voices added by our helpers.
+        Log.d(MainActivity.LOG_TAG, "Added voice: " + shortName);
+
         loadedSounds.add(getMediaPlayer(shortName));
     }
 
