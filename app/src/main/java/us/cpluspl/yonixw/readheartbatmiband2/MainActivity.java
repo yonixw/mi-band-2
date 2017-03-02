@@ -13,6 +13,8 @@ import android.view.View;
 import android.bluetooth.BluetoothAdapter;
 import android.widget.Toast;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.BLEAction {
@@ -76,15 +78,17 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
             );
 
         // Need to wait before first trigger, maybe something about the descriptor....
+        /*
+        Toast.makeText(MainActivity.this, "Wait for heartbeat setup...", Toast.LENGTH_LONG).show();
         try {
-            Toast.makeText(MainActivity.this, "Wait for heartbeat setup...", Toast.LENGTH_LONG).show();
             Thread.sleep(5000,0);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        */
     }
 
-    public void getNewHeartBeat() throws InterruptedException {
+    public void getNewHeartBeat()  {
         if (helper == null || !helper.isConnected()) {
             Toast.makeText(MainActivity.this, "Please setup first!", Toast.LENGTH_SHORT).show();
             return;
@@ -167,7 +171,29 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
     }
 
     /* ===========  Touch pattern =============== */
+    int counter = 0;
+    Date lastTouch = null;
 
+    void onBandButtonTouch() {
+        Date now = Calendar.getInstance().getTime();
+        if (lastTouch == null) {
+            lastTouch = now;
+            counter = 0;
+        }
+
+        int miliInSeconds = 1000;
+        if ((now.getTime() -  lastTouch.getTime()) < 1 * miliInSeconds )  {
+            counter++;
+            lastTouch = now;
+        }
+
+        if (counter == 4) {
+            lastTouch = null;
+            counter = 0;
+            getNewHeartBeat();
+        }
+
+    }
 
      /* ===========  Sounds =============== */
 
