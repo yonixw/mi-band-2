@@ -44,7 +44,13 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
         helper.findBluetoothDevice(myBluetoothAdapter, "MI");
         helper.ConnectToGatt();
 
-
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        getTouchNotifications();
+        setupHeartBeat();
     }
 
 
@@ -131,8 +137,7 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
 
     @Override
     public void onConnect() {
-        getTouchNotifications();
-        setupHeartBeat();
+
     }
 
     @Override
