@@ -56,12 +56,14 @@ public class HearBeatVoice {
         if (Hearbeat < 0 ) return;
 
 
-        sh.addWAVSound(intro);
+
 
         if (Hearbeat == 0 ) {
             sh.addWAVSound(cantRead); // Mi band couldnt read heartbeat.
         }
         else {
+            sh.addWAVSound(intro);
+
             if (h > 0 && h11 >= 20 ) {
                 sh.addWAVSound("h" + str(h)); // Mea
             }
@@ -72,8 +74,10 @@ public class HearBeatVoice {
             // Else less than 100.
 
             addLessThan100(sh,Hearbeat);
+
+            sh.addWAVSound(units);
         }
 
-        sh.addWAVSound(units);
+
     }
 }
