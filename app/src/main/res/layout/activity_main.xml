@@ -41,4 +41,14 @@
         android:id="@+id/btnStartHearRate"
         android:text="Start new Heart Rate"
         android:onClick="btnTestHeartRate"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txtPath"
+        android:layout_below="@id/btnStartHearRate"
+        android:textSize="20dp"
+        android:background="#FFFF00"
+        android:text="Path here"
+        />
 </RelativeLayout>

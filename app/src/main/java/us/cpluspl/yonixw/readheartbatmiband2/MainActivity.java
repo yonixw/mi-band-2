@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 
 import android.bluetooth.BluetoothAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Calendar;
@@ -23,6 +24,8 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
     Handler handler = new Handler(Looper.getMainLooper());
     BLEMiBand2Helper helper = null;
 
+    TextView txtPath;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,6 +35,10 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
         helper.addListener(this);
 
         initSoundHelper();
+
+        // Get save path:
+        txtPath = (TextView) findViewById(R.id.txtPath);
+        txtPath.setText( getApplicationContext().getExternalFilesDir(null).getAbsolutePath());
     }
 
     @Override
@@ -249,4 +256,6 @@ https://github.com/dkhmelenko/miband-android/blob/master/miband-sdk/src/main/jav
 
 http://stackoverflow.com/questions/7378936/how-to-show-toast-message-from-background-thread
 http://stackoverflow.com/questions/6270132/create-a-custom-event-in-java
+
+http://stackoverflow.com/questions/6537023/how-can-i-perform-arithmetic-operation-with-dates-in-java
 */
