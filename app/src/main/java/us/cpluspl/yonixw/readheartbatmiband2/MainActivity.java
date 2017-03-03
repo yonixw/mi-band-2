@@ -168,6 +168,7 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
                     // Set max volume and read heart beat.
                     setMaxVolume();
                     HearBeatVoice.readHeartbeat(mySounds, hearbeat);
+                    mySounds.playAllAsync();
                 }
             });
         }
@@ -176,38 +177,16 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
 
                 @Override
                 public void run() {
+                    getNewHeartBeat();
                     Toast.makeText(MainActivity.this,
-                            "Button Press!"
+                            "Button Press! "
                             , Toast.LENGTH_SHORT).show();
                 }
             });
         }
     }
 
-    /* ===========  Touch pattern =============== */
-    int counter = 0;
-    Date lastTouch = null;
 
-    void onBandButtonTouch() {
-        Date now = Calendar.getInstance().getTime();
-        if (lastTouch == null) {
-            lastTouch = now;
-            counter = 0;
-        }
-
-        int miliInSeconds = 1000;
-        if ((now.getTime() -  lastTouch.getTime()) < 1 * miliInSeconds )  {
-            counter++;
-            lastTouch = now;
-        }
-
-        if (counter == 4) {
-            lastTouch = null;
-            counter = 0;
-            getNewHeartBeat();
-        }
-
-    }
 
      /* ===========  Sounds =============== */
 
