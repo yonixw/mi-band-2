@@ -113,11 +113,12 @@ public class BLEMiBand2Helper {
                     Log.d(TAG, "Gatt state: connected");
                     gatt.discoverServices();
                     isConnectedToGatt = true;
+                    raiseonConnect();
                     break;
                 default:
                     Log.d(TAG, "Gatt state: not connected");
-                    raiseonDisconnect();
                     isConnectedToGatt = false;
+                    raiseonDisconnect();
                     break;
             }
         }
@@ -150,6 +151,7 @@ public class BLEMiBand2Helper {
 
     public interface BLEAction {
         void onDisconnect();
+        void onConnect();
         void onRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status);
         void onWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status);
         void onNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic);
@@ -182,7 +184,7 @@ public class BLEMiBand2Helper {
     public void raiseonWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic,int status) {
         // Notify everybody that may be interested.
         for (BLEAction listener : listeners)
-            listener.onRead( gatt,characteristic,status);
+            listener.onWrite( gatt,characteristic,status);
     }
 
     public void raiseonDisconnect() {
@@ -190,6 +192,13 @@ public class BLEMiBand2Helper {
         for (BLEAction listener : listeners)
             listener.onDisconnect();
     }
+
+    public void raiseonConnect() {
+        // Notify everybody that may be interested.
+        for (BLEAction listener : listeners)
+            listener.onConnect();
+    }
+
 
     /* =========  Handling Data  ============== */
 

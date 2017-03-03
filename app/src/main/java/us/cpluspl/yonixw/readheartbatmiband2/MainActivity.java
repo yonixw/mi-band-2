@@ -39,24 +39,20 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
         // Get save path:
         txtPath = (TextView) findViewById(R.id.txtPath);
         txtPath.setText( getApplicationContext().getExternalFilesDir(null).getAbsolutePath());
-    }
 
-    @Override
-    protected void onResume() {
+        // Setup Bluetooth:
         helper.findBluetoothDevice(myBluetoothAdapter, "MI");
         helper.ConnectToGatt();
 
-        getTouchNotifications();
-        setupHeartBeat();
 
-        super.onResume();
     }
 
+
     @Override
-    protected void onPause() {
+    protected void onDestroy() {
         if (helper != null)
             helper.DisconnectGatt();
-        super.onPause();
+        super.onDestroy();
     }
 
     // Like network card, connect to all devices in Bluetooth (like PC in Netowrk)
@@ -131,6 +127,12 @@ public class MainActivity extends AppCompatActivity implements BLEMiBand2Helper.
     @Override
     public void onDisconnect() {
 
+    }
+
+    @Override
+    public void onConnect() {
+        getTouchNotifications();
+        setupHeartBeat();
     }
 
     @Override
